@@ -2,7 +2,7 @@
 
 ## Welcome
 
-This is a guide to get you started with Vase - the data-driven
+This is a guide to get you started with Vase, the data-driven
 microservice container. It will help you write your first descriptor
 file.
 
@@ -69,16 +69,16 @@ of the data model and even some URLs that might appear in the API.
 
 Our data model needs to handle:
 
- * Items (with item IDs, names, and descriptions)
- * Users (with user IDs, emails, and a list of items they own)
+* Items (with item IDs, names, and descriptions)
+* Users (with user IDs, emails, and a list of items they own)
 
 And we might have URLs that:
 
- * Fetch all items in the system
- * Fetch all users in the system
- * Fetch a user given their user ID
- * Fetch a user's owned-item list given their user ID
- * etc.
+* Fetch all items in the system
+* Fetch all users in the system
+* Fetch a user given their user ID
+* Fetch a user's owned-item list given their user ID
+* etc.
 
 ## Building the data model
 
@@ -103,23 +103,19 @@ with parts of Vase itself.)
 
 Thanks to the template, we have a lot of stuff inside
 `:vase/norms`. Start by clearing out the current value of
-`:vase/norms` and replace it with this:
+`:vase/norms`:
 
 ```clojure
- :vase/norms
-  {:your-first-api/accounts {}
-  }
+ :vase/norms {}
 ```
 
 (This goes inside the map attached to `:descriptor`.)
 
-This says we're building a schema named
-`:your-first-api/accounts`. The first component of a schema is
-defining its normalized, master form.  That's done using the
+Now we can add the normalized, master form of our schema to the
 `:vase/norms` entry. In this map, we'll define attributes for Items
-and Users.  You'll notice that the Users schema requires the Items
-schema, so that we can describe a user's owned items. You'll also
-notice that attributes of a given entity are defined in terms of
+and Users.  Note that the `:accounts/user` schema requires the
+`:accounts/item` schema, so that we can describe a user's owned items.
+Also note that attributes of a given entity are defined in terms of
 database transactions (*txes*) that describe them.
 
 ```clojure
@@ -149,7 +145,7 @@ values, that the DB should `:index`, or that allow for `:fulltext`
 search.  `:fulltext` also implies `:index`.  You can also say an
 entity's unique `:identity` can be determined by an attribute, which
 is useful when you want to ensure an entity can be upserted
-(`user_id`), but not when you want to avoiding adding a new user that
+(`userId`), but not when you want to avoiding adding a new user that
 already exists (say, given their `email` - a `:unique` attribute).
 
 Even though the short-schema version covers most of the use cases
@@ -157,12 +153,10 @@ you'll need, you're always free to use full Datomic
 [schema](http://docs.datomic.com/schema.html) definitions like:
 
 ```clojure
-{:db/id          #db/id[:db.part/db]
- :db/ident       :item/name
+{:db/ident       :item/name
  :db/valueType   :db.type/string
  :db/cardinality :db.cardinality/one
- :db/doc         "The name of an item"
- :db.install/_attribute :db.part/db}
+ :db/doc         "The name of an item"}
 ```
 
 Just put that entity map in the outer vector, as a sibling to the
@@ -188,7 +182,7 @@ information about our API:
  {:accounts/v1
   {:vase.api/routes
    {"/about" {:get #vase/respond {:name :accounts.v1/about-response
-                                  :body "General User and Item InformatioN"}}}}}
+                                  :body "General User and Item Information"}}}}}
 ```
 
 Routes are defined as nested maps. Each map defines a single route,
@@ -217,7 +211,7 @@ of schema will be applied to our database.
 {:vase/apis
  {:accounts/v1
   {:vase.api/routes  ,,, ;; skipping the routes for space
-   :vase.api/schemas [:account/item]}}}
+   :vase.api/schemas [:accounts/user]}}}
 ```
 
 ## Forwarding Headers
@@ -231,10 +225,9 @@ level of the whole API:
 {:vase/apis
  {:accounts/v1
   {:vase.api/routes          ,,, ;; skipping the routes for space
-   :vase.api/schemas         [:account/item]
+   :vase.api/schemas         [:accounts/user]
    :vase.api/forward-headers ["vaserequest-id"]}}}
 ```
-
 
 Since our API is only about providing operations for user details and
 accounts, we only need to depend on/declare the user schema.  Above
